@@ -26,6 +26,13 @@ create table if not exists public.turnos (
 
 create index if not exists turnos_fecha_idx on public.turnos (fecha);
 
+-- Quién es quién: el dueño de la barbería y el administrador del sistema.
+create table if not exists public.perfiles (
+  id      uuid primary key references auth.users (id) on delete cascade,
+  nombre  text,
+  rol     text not null default 'dueno'   -- 'dueno' o 'admin'
+);
+
 -- ---------------------------------------------------------------
 -- Reglas de acceso
 -- ---------------------------------------------------------------
@@ -64,8 +71,27 @@ drop policy if exists turnos_barbero on public.turnos;
 create policy turnos_barbero on public.turnos
   for all to authenticated using (true) with check (true);
 
+-- Cada uno lee los perfiles para saber con qué rol entró.
+alter table public.perfiles enable row level security;
+
+drop policy if exists perfiles_lectura on public.perfiles;
+create policy perfiles_lectura on public.perfiles
+  for select to authenticated using (true);
+
 -- ---------------------------------------------------------------
 -- Actualizaciones en vivo (dos pestañas abiertas se sincronizan)
 -- ---------------------------------------------------------------
 alter publication supabase_realtime add table public.turnos;
 alter publication supabase_realtime add table public.config;
+
+-- ---------------------------------------------------------------
+-- Cargá los dos usuarios
+-- ---------------------------------------------------------------
+-- Creá las dos cuentas en Authentication > Users > Add user (marcá
+-- "Auto Confirm User"), copiá el id de cada una y corré esto cambiando
+-- los valores. El rol 'admin' es el único que edita la suscripción.
+
+-- insert into public.perfiles (id, nombre, rol) values
+--   ('PEGA-ACA-EL-ID-DEL-BARBERO', 'Nombre del barbero', 'dueno'),
+--   ('PEGA-ACA-TU-ID',             'Tu nombre',          'admin')
+-- on conflict (id) do update set nombre = excluded.nombre, rol = excluded.rol;

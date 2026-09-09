@@ -25,9 +25,11 @@ Son tres pasos y se hace en una tarde. No hace falta saber programar.
 2. Entrá a **SQL Editor → New query**, pegá todo el contenido de
    [`supabase.sql`](supabase.sql) y apretá **Run**. Eso crea las tablas y las
    reglas de acceso.
-3. Andá a **Authentication → Users → Add user** y creá **un solo usuario**, con
-   el correo y la contraseña del barbero. Marcá "Auto Confirm User". Ese es el
-   login del panel.
+3. Andá a **Authentication → Users → Add user** y creá **dos usuarios**, cada
+   uno con su correo y contraseña. Marcá "Auto Confirm User" en los dos:
+   uno para el barbero y otro para vos. Después copiá el identificador de cada
+   uno y corré el `insert` que está comentado al final de `supabase.sql`, con el
+   barbero como `dueno` y vos como `admin`.
 4. En **Authentication → Providers**, desactivá el registro público
    ("Allow new users to sign up"). Así nadie más puede crearse una cuenta.
 5. Entrá a **Settings → API** y copiá dos cosas: la **Project URL** y la clave
@@ -65,7 +67,8 @@ Para actualizar más adelante, volvés a arrastrar la carpeta.
 
 ## Primer uso
 
-1. Abrí el link y entrá a **Panel** con el correo y la contraseña del paso 1.3.
+1. Abrí el link y entrá a **Panel** con cualquiera de las dos cuentas del paso 1.3.
+   Arriba a la derecha vas a ver con cuál entraste y con qué rol.
 2. Cargá los horarios reales, los servicios con sus precios y los barberos.
    Apretá **Guardar ajustes**.
 3. Listo. Ese mismo link es el que se pega en la bio de Instagram y se manda por
@@ -75,6 +78,47 @@ En el celular conviene abrirlo una vez y usar **Agregar a pantalla de inicio**.
 Queda con ícono propio y se abre a pantalla completa, igual que una app de la tienda.
 
 ---
+
+## Los dos accesos
+
+| | Dueño (el barbero) | Administrador (vos) |
+| --- | --- | --- |
+| Agenda, cancelar, bloquear | sí | sí |
+| Horarios, servicios, precios, barberos | sí | sí |
+| Importe y vencimiento de la suscripción | solo mira | edita |
+| Firma del pie de página | no la ve | edita |
+
+Los dos entran por la misma pantalla. El rol sale de la tabla `perfiles`, así que
+para cambiarlo se toca la base, no la app.
+
+## La suscripción mensual
+
+En el panel, dentro de Ajustes, hay una sección con el importe por mes, la fecha
+del próximo vencimiento y un enlace de pago. Muestra cuántos días faltan, avisa
+en el panel cinco días antes y sigue avisando cuando se pasó.
+
+**El cobro no lo hace la app.** Generá una suscripción desde tu cuenta de
+Mercado Pago (Tu negocio → Suscripciones → Crear), copiá el enlace y pegalo en
+el campo "Enlace de pago". La app lleva la cuenta, Mercado Pago cobra. Cuando
+entra un pago, apretás **Registrar el pago del mes** y el vencimiento se corre
+treinta días.
+
+Hay una casilla, **Pausar los turnos nuevos cuando el pago esté vencido**. Si la
+dejás apagada, un vencimiento solo muestra el aviso y la barbería sigue
+trabajando igual. Si la prendés, los clientes ven un cartel que los manda a
+pedir turno por WhatsApp y no pueden reservar solos hasta que se regularice. La
+agenda cargada nunca se toca ni se pierde.
+
+Tené presente qué es cada cosa: la sección de suscripción es un registro de
+cobro, no una cerradura. Lo que realmente sostiene el acuerdo es que el hosting
+y el proyecto de Supabase están a tu nombre.
+
+## Tu firma
+
+También en Ajustes, y solo visible para el administrador, cargás tu nombre, tu
+WhatsApp y tu correo. Aparecen en letra chica al pie de la página, con el
+teléfono enlazado a WhatsApp y el correo a un mail. Es lo que hace que el
+próximo cliente te encuentre solo.
 
 ## Qué hay que saber
 

@@ -110,6 +110,15 @@ input:focus,select:focus,button:focus-visible{outline:2px solid var(--brass);out
 .banner{border:1px dashed var(--line);background:var(--surface-2);border-radius:10px;padding:10px 12px;font-size:12.5px;color:var(--ink-2);margin-bottom:14px}
 .sec{margin-top:22px}
 .sec h3{font-size:14px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+.tag.rol{background:var(--brass-soft);color:var(--brass)}
+.tag.ok{background:var(--brass-soft);color:var(--brass)}
+.suscCaja{border:1px solid var(--line);background:var(--surface-2);border-radius:10px;padding:12px 14px;display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.suscCaja .imp{font-family:"Prata",Georgia,serif;font-size:20px;font-variant-numeric:tabular-nums}
+a.btn{display:inline-block;text-align:center;text-decoration:none}
+.pie{border-top:1px solid var(--line);background:var(--surface);padding:18px 0 26px}
+.pie p{margin:0;font-size:11.5px;color:var(--ink-3);letter-spacing:.02em}
+.pie a{color:var(--ink-2);text-decoration:none;border-bottom:1px solid var(--line)}
+.pie a:hover{color:var(--brass);border-color:var(--brass)}
 .links{display:flex;gap:8px;flex-wrap:wrap}
 .links a{font-size:12.5px;font-weight:700;text-decoration:none;color:var(--brass);border:1px solid var(--line);border-radius:8px;padding:6px 10px;display:inline-block;background:var(--surface)}
 .links a:hover,.links .lnkbtn:hover{border-color:var(--brass)}
@@ -129,6 +138,7 @@ input:focus,select:focus,button:focus-visible{outline:2px solid var(--brass);out
 </div></header>
 
 <main class="wrap">
+  <div id="avisoCli" class="banner" hidden></div>
   <div id="offline" class="banner" hidden>Vista de muestra: todavía no está conectada la base de datos, así que los turnos no se guardan. Completá config.js siguiendo el README.</div>
 
   <section id="viewCli" class="cols">
@@ -168,6 +178,7 @@ input:focus,select:focus,button:focus-visible{outline:2px solid var(--brass);out
     </div></div>
 
     <div id="admin" hidden class="cols">
+      <div id="avisoSusc" class="banner" hidden style="grid-column:1/-1;margin:0"></div>
       <div class="panel"><div class="pad">
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px">
           <div><div class="eyebrow">Agenda</div><h2 id="agTitle" style="font-size:20px"></h2></div>
@@ -175,6 +186,7 @@ input:focus,select:focus,button:focus-visible{outline:2px solid var(--brass);out
             <button class="btn ghost" id="agPrev" aria-label="Día anterior">◀</button>
             <input id="agDate" type="date" style="width:auto">
             <button class="btn ghost" id="agNext" aria-label="Día siguiente">▶</button>
+            <span class="tag rol" id="quien"></span>
             <button class="btn ghost" id="salir">Salir</button>
           </div>
         </div>
@@ -206,6 +218,32 @@ input:focus,select:focus,button:focus-visible{outline:2px solid var(--brass);out
           <div><label class="f" for="cfgMapa">Link de Google Maps</label><input id="cfgMapa"></div>
           <div><label class="f" for="cfgIg">Usuario de Instagram (sin arroba)</label><input id="cfgIg"></div>
         </div>
+        <div class="sec" id="secSusc"><h3>Suscripción del sistema</h3>
+          <div class="suscCaja"><div><div class="eyebrow">Estado</div><div id="suscTxt" style="margin-top:2px"></div></div>
+            <div style="text-align:right"><div class="eyebrow">Por mes</div><div class="imp" id="suscImp">—</div></div></div>
+          <div class="grid g2" style="margin-top:12px">
+            <div><label class="f" for="suMonto">Importe por mes</label><input id="suMonto" type="number" min="0" step="1000"></div>
+            <div><label class="f" for="suVence">Próximo vencimiento</label><input id="suVence" type="date"></div>
+            <div><label class="f" for="suLink">Enlace de pago</label><input id="suLink" placeholder="https://www.mercadopago.com.ar/..."></div>
+          </div>
+          <label style="display:flex;gap:8px;align-items:center;margin-top:10px;font-size:13px" for="suCorte">
+            <input type="checkbox" id="suCorte" style="width:auto"> Pausar los turnos nuevos cuando el pago esté vencido</label>
+          <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+            <button class="btn ghost" id="suPagado">Registrar el pago del mes</button>
+            <a class="btn ghost" id="suPagar" target="_blank" rel="noopener noreferrer">Ir a pagar</a>
+          </div>
+          <p class="note" id="suscNota" style="margin-top:10px"></p>
+        </div>
+
+        <div class="sec" id="secFirma"><h3>Tu firma al pie</h3>
+          <p class="note" style="margin-bottom:8px">Aparece en letra chica abajo de todo, para que te contacten si les gusta el sistema. Dejá vacío lo que no quieras mostrar.</p>
+          <div class="grid g2">
+            <div><label class="f" for="auNom">Tu nombre</label><input id="auNom" placeholder="Nombre y apellido"></div>
+            <div><label class="f" for="auTel">Tu WhatsApp</label><input id="auTel" placeholder="11 5555 4444"></div>
+            <div><label class="f" for="auMail">Tu correo</label><input id="auMail" placeholder="vos@correo.com"></div>
+          </div>
+        </div>
+
         <div class="sec"><h3>Horarios</h3>
           <p class="note" style="margin-bottom:6px">Primer par: turno mañana. Segundo par: turno tarde. Dejalo vacío si ese tramo no se trabaja.</p>
           <div id="days"></div></div>
@@ -220,6 +258,8 @@ input:focus,select:focus,button:focus-visible{outline:2px solid var(--brass);out
   </section>
 </main>
 
+<footer class="pie" id="pie" hidden><div class="wrap"><p id="creditos"></p></div></footer>
+
 <div class="toast" id="toast" role="status"></div>
 
 <script>
@@ -229,6 +269,8 @@ var MONTH=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","di
 var DEF={
   nombre:"Catenaccio Barber Club", sub:"Muñiz 908 · Boedo, CABA", paso:15, pin:"1234",
   dir:"Muñiz 908, C1234 CABA", mapa:"https://maps.app.goo.gl/hhxV39d5gzA3oDmm9", ig:"catenaccio.barberclub",
+  autor:{nombre:"", tel:"", mail:"plpuella@hotmail.com"},
+  susc:{monto:0, vence:"", link:"", corte:false},
   servicios:[{n:"Corte de pelo",m:30,p:9000},{n:"Corte + barba",m:45,p:13000},{n:"Barba y perfilado",m:20,p:6000},{n:"Corte niño",m:30,p:7500}],
   barberos:["Barbero"],
   dias:[{a:false,b:[]},
@@ -341,6 +383,48 @@ function renderMine(){
 }
 function cmp(a,b){return a.fecha===b.fecha?a.ini-b.ini:(a.fecha<b.fecha?-1:1)}
 
+var ROL="dueno", QUIEN="";
+function esAdmin(){return ROL==="admin"}
+function sumarMes(f){var d=parseISO(f);var dia=d.getDate();d.setDate(1);d.setMonth(d.getMonth()+1);
+  var ult=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();d.setDate(Math.min(dia,ult));return iso(d)}
+function diasHasta(f){if(!f)return null;return Math.round((parseISO(f)-parseISO(iso(new Date())))/86400000)}
+function suscVencida(){var d=diasHasta((CFG.susc||{}).vence);return d!==null&&d<0}
+function turnosPausados(){return !!((CFG.susc||{}).corte&&suscVencida())}
+function renderSusc(){
+  var su=CFG.susc||{},d=diasHasta(su.vence),txt,cls;
+  if(!su.vence){txt="Sin fecha de cobro cargada";cls="tag"}
+  else if(d<0){txt="Vencida hace "+Math.abs(d)+" día"+(Math.abs(d)===1?"":"s");cls="tag"}
+  else if(d===0){txt="Vence hoy";cls="tag ok"}
+  else{txt="Al día · vence en "+d+" día"+(d===1?"":"s");cls="tag ok"}
+  $("suscTxt").innerHTML='<span class="'+cls+'">'+txt+"</span>";
+  $("suscImp").textContent=su.monto?money(su.monto):"—";
+  var pagar=$("suPagar");pagar.href=su.link||"#";pagar.hidden=!su.link;
+  var av=$("avisoSusc");
+  if(d!==null&&d<0){av.hidden=false;
+    av.innerHTML="El pago del sistema está vencido desde el "+largo(su.vence)+". "+
+      (su.corte?"Los turnos nuevos están pausados hasta que se regularice.":"Los turnos siguen funcionando con normalidad.")+
+      (su.link?' <a href="'+su.link+'" target="_blank" rel="noopener noreferrer">Ir a pagar</a>':"");
+  } else if(d!==null&&d<=5){av.hidden=false;av.textContent="El pago del sistema vence "+(d===0?"hoy":"en "+d+" días")+".";}
+  else av.hidden=true;
+  $("suscNota").textContent=esAdmin()
+    ?"Solo vos podés tocar esta sección. El cobro lo hace el enlace de pago; acá se lleva la cuenta."
+    :"Esta sección la administra quien desarrolló el sistema.";
+}
+function aplicarRol(){
+  $("quien").textContent=(QUIEN?QUIEN+" · ":"")+(esAdmin()?"Administrador":"Dueño");
+  $("secFirma").hidden=!esAdmin();
+  ["suMonto","suVence","suLink","suCorte","suPagado"].forEach(function(k){$(k).disabled=!esAdmin()});
+}
+function wa(tel){var d=String(tel).replace(/\D/g,"");if(!d)return "";if(d.indexOf("54")!==0)d="549"+d;return "https://wa.me/"+d}
+function renderPie(){
+  var a=CFG.autor||{},partes=[];
+  if(a.nombre)partes.push(esc(a.nombre));
+  if(a.tel)partes.push('<a href="'+wa(a.tel)+'" target="_blank" rel="noopener noreferrer">'+esc(a.tel)+'</a>');
+  if(a.mail)partes.push('<a href="mailto:'+esc(a.mail)+'">'+esc(a.mail)+'</a>');
+  $("pie").hidden=!partes.length;
+  if(partes.length)$("creditos").innerHTML="Sistema de turnos desarrollado por "+partes.join(" &middot; ")+". ¿Querés uno para tu local? Escribime.";
+}
+
 function stamp(f,m){return f.replace(/-/g,"")+"T"+String(Math.floor(m/60)).padStart(2,"0")+String(m%60).padStart(2,"0")+"00"}
 function gcalUrl(t){
   var p=["action=TEMPLATE",
@@ -370,6 +454,10 @@ function bajarIcs(id){
 function renderAll(){
   $("brandName").textContent=CFG.nombre;$("brandSub").textContent=CFG.sub;
   $("dirTxt").textContent=CFG.dir||"";
+  renderPie();
+  renderSusc();
+  $("avisoCli").hidden=!turnosPausados();
+  if(turnosPausados())$("avisoCli").textContent="Las reservas online están pausadas por el momento. Escribinos y te damos el turno por WhatsApp.";
   $("lnkMapa").href=CFG.mapa||"#";$("lnkMapa").hidden=!CFG.mapa;
   $("lnkIg").href=CFG.ig?"https://www.instagram.com/"+CFG.ig+"/":"#";$("lnkIg").hidden=!CFG.ig;
   if(S.svc!==null&&!CFG.servicios[S.svc])S.svc=null;
@@ -379,6 +467,7 @@ function renderAll(){
 }
 
 function confirmar(){
+  if(turnosPausados()){toast("Las reservas online están pausadas. Escribinos por WhatsApp.");return}
   var s=CFG.servicios[S.svc];
   if(!libre(S.fecha,S.barb,S.ini,s.m)){toast("Justo se ocupó ese horario. Elegí otro.");S.ini=null;renderAll();return}
   var t={id:"t"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),tipo:"turno",fecha:S.fecha,ini:S.ini,dur:s.m,
@@ -423,7 +512,10 @@ function renderAdmin(){
 
 function renderCfg(){
   $("cfgName").value=CFG.nombre;$("cfgSub").value=CFG.sub;$("cfgStep").value=CFG.paso;
+  var su=CFG.susc||{};$("suMonto").value=su.monto||"";$("suVence").value=su.vence||"";
+  $("suLink").value=su.link||"";$("suCorte").checked=!!su.corte;aplicarRol();
   $("cfgDir").value=CFG.dir||"";$("cfgMapa").value=CFG.mapa||"";$("cfgIg").value=CFG.ig||"";
+  var au=CFG.autor||{};$("auNom").value=au.nombre||"";$("auTel").value=au.tel||"";$("auMail").value=au.mail||"";
   $("days").innerHTML=CFG.dias.map(function(d,i){
     var b1=d.b[0]||["",""],b2=d.b[1]||["",""],v=[b1[0],b1[1],b2[0],b2[1]];
     return '<div class="dayrow"><div class="dn"><input type="checkbox" style="width:auto" data-day="'+i+'" '+(d.a?"checked":"")+'> '+DAYS[i]+'</div>'+
@@ -448,6 +540,10 @@ function leerCfg(){
   c.dir=$("cfgDir").value.trim();
   var mp=$("cfgMapa").value.trim();c.mapa=/^https?:\/\//i.test(mp)?mp:"";
   c.ig=$("cfgIg").value.trim().replace(/^@/,"");
+  c.autor={nombre:$("auNom").value.trim(),tel:$("auTel").value.trim(),mail:$("auMail").value.trim()};
+  var lk=$("suLink").value.trim();
+  c.susc={monto:+$("suMonto").value||0,vence:$("suVence").value||"",
+    link:/^https?:\/\//i.test(lk)?lk:"",corte:$("suCorte").checked};
   c.dias=CFG.dias.map(function(d,i){
     var v=function(j){return document.querySelector('[data-h="'+i+'-'+j+'"]').value};
     var b=[];if(v(0)&&v(1))b.push([v(0),v(1)]);if(v(2)&&v(3))b.push([v(2),v(3)]);
@@ -483,7 +579,7 @@ $("pinBtn").onclick=function(){
   SB.auth.signInWithPassword({email:$("mail").value.trim(),password:$("pass").value}).then(function(r){
     b.disabled=false;b.textContent="Entrar";
     if(r.error){$("pinMsg").textContent="No pudimos entrar. Revisá el correo y la contraseña.";return}
-    abrirPanel();
+    cargarPerfil().then(abrirPanel);
   });
 };
 $("pass").addEventListener("keydown",function(e){if(e.key==="Enter")$("pinBtn").click()});
@@ -493,6 +589,13 @@ $("agPrev").onclick=function(){var d=parseISO($("agDate").value);d.setDate(d.get
 $("agNext").onclick=function(){var d=parseISO($("agDate").value);d.setDate(d.getDate()+1);$("agDate").value=iso(d);renderAdmin()};
 $("blkBtn").onclick=bloquear;
 $("save").onclick=guardar;
+$("suPagado").onclick=function(){
+  if(!esAdmin())return;
+  var base=$("suVence").value||iso(new Date());
+  if(diasHasta(base)<0)base=iso(new Date());
+  $("suVence").value=sumarMes(base);
+  guardar();
+};
 $("svcAdd").onclick=function(){var c=leerCfg();c.servicios.push({n:"Nuevo servicio",m:30,p:0});CFG=c;renderCfg()};
 $("barbAdd").onclick=function(){var c=leerCfg();c.barberos.push("Nuevo barbero");CFG=c;renderCfg()};
 $("confirm").onclick=confirmar;
@@ -504,6 +607,15 @@ renderAll();
 var SB=null;
 
 function chk(r){if(r&&r.error)throw r.error;return r}
+function cargarPerfil(){
+  return SB.auth.getUser().then(function(u){
+    var id=u&&u.data&&u.data.user?u.data.user.id:null;
+    if(!id)return;
+    return SB.from("perfiles").select("nombre,rol").eq("id",id).maybeSingle().then(function(r){
+      if(r.data){ROL=r.data.rol||"dueno";QUIEN=r.data.nombre||""}
+    });
+  }).catch(function(){});
+}
 function shim(sb){
   return {
     collection:function(){return{doc:function(id){return{
@@ -544,6 +656,6 @@ function traerConfig(){
   traerConfig();traerTurnos();
   SB.channel("turnos-live").on("postgres_changes",{event:"*",schema:"public",table:"turnos"},traerTurnos)
     .on("postgres_changes",{event:"*",schema:"public",table:"config"},traerConfig).subscribe();
-  SB.auth.getSession().then(function(r){if(r.data&&r.data.session)abrirPanel()});
+  SB.auth.getSession().then(function(r){if(r.data&&r.data.session)cargarPerfil().then(abrirPanel)});
 })();
 </script>
