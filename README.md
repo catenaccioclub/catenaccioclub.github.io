@@ -85,7 +85,7 @@ Queda con ícono propio y se abre a pantalla completa, igual que una app de la t
 | --- | --- | --- |
 | Agenda, cancelar, bloquear | sí | sí |
 | Horarios, servicios, precios, barberos | sí | sí |
-| Importe y vencimiento de la suscripción | solo mira | edita |
+| Importe y vencimiento de la suscripción | sí | sí |
 | Firma del pie de página | no la ve | edita |
 
 Los dos entran por la misma pantalla. El rol sale de la tabla `perfiles`, así que

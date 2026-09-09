@@ -269,7 +269,7 @@ var MONTH=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","di
 var DEF={
   nombre:"Catenaccio Barber Club", sub:"Muñiz 908 · Boedo, CABA", paso:15, pin:"1234",
   dir:"Muñiz 908, C1234 CABA", mapa:"https://maps.app.goo.gl/hhxV39d5gzA3oDmm9", ig:"catenaccio.barberclub",
-  autor:{nombre:"", tel:"", mail:"plpuella@hotmail.com"},
+  autor:{nombre:"Patricio Puella", tel:"11 6910 3013", mail:"plpuella@hotmail.com"},
   susc:{monto:0, vence:"", link:"", corte:false},
   servicios:[{n:"Corte de pelo",m:30,p:9000},{n:"Corte + barba",m:45,p:13000},{n:"Barba y perfilado",m:20,p:6000},{n:"Corte niño",m:30,p:7500}],
   barberos:["Barbero"],
@@ -406,20 +406,19 @@ function renderSusc(){
       (su.link?' <a href="'+su.link+'" target="_blank" rel="noopener noreferrer">Ir a pagar</a>':"");
   } else if(d!==null&&d<=5){av.hidden=false;av.textContent="El pago del sistema vence "+(d===0?"hoy":"en "+d+" días")+".";}
   else av.hidden=true;
-  $("suscNota").textContent=esAdmin()
-    ?"Solo vos podés tocar esta sección. El cobro lo hace el enlace de pago; acá se lleva la cuenta."
-    :"Esta sección la administra quien desarrolló el sistema.";
+  $("suscNota").textContent="El cobro lo hace el enlace de pago; acá se lleva la cuenta.";
 }
 function aplicarRol(){
   $("quien").textContent=(QUIEN?QUIEN+" · ":"")+(esAdmin()?"Administrador":"Dueño");
   $("secFirma").hidden=!esAdmin();
-  ["suMonto","suVence","suLink","suCorte","suPagado"].forEach(function(k){$(k).disabled=!esAdmin()});
 }
-function wa(tel){var d=String(tel).replace(/\D/g,"");if(!d)return "";if(d.indexOf("54")!==0)d="549"+d;return "https://wa.me/"+d}
+function wa(tel,msj){var d=String(tel).replace(/\D/g,"");if(!d)return "";
+  if(d.indexOf("54")!==0)d="549"+d;
+  return "https://wa.me/"+d+(msj?"?text="+encodeURIComponent(msj):"")}
 function renderPie(){
   var a=CFG.autor||{},partes=[];
   if(a.nombre)partes.push(esc(a.nombre));
-  if(a.tel)partes.push('<a href="'+wa(a.tel)+'" target="_blank" rel="noopener noreferrer">'+esc(a.tel)+'</a>');
+  if(a.tel)partes.push('<a href="'+wa(a.tel,"Hola "+(a.nombre||"")+", vi el sistema de turnos de "+CFG.nombre+" y quiero uno para mi local.")+'" target="_blank" rel="noopener noreferrer">'+esc(a.tel)+'</a>');
   if(a.mail)partes.push('<a href="mailto:'+esc(a.mail)+'">'+esc(a.mail)+'</a>');
   $("pie").hidden=!partes.length;
   if(partes.length)$("creditos").innerHTML="Sistema de turnos desarrollado por "+partes.join(" &middot; ")+". ¿Querés uno para tu local? Escribime.";
@@ -590,7 +589,6 @@ $("agNext").onclick=function(){var d=parseISO($("agDate").value);d.setDate(d.get
 $("blkBtn").onclick=bloquear;
 $("save").onclick=guardar;
 $("suPagado").onclick=function(){
-  if(!esAdmin())return;
   var base=$("suVence").value||iso(new Date());
   if(diasHasta(base)<0)base=iso(new Date());
   $("suVence").value=sumarMes(base);
