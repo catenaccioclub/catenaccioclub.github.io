@@ -377,7 +377,8 @@ function renderMine(){
     '<button class="btn warn" data-cancel="'+t.id+'">Cancelar</button></div>'+
     '<div class="links" style="margin-top:8px">'+
     '<button class="lnkbtn" data-ics="'+t.id+'">Agregar al calendario</button>'+
-    '<a href="'+gcalUrl(t)+'" target="_blank" rel="noopener noreferrer">Google Calendar</a></div></div>'}).join("");
+    (esCelular()?"":'<a href="'+gcalUrl(t)+'" target="_blank" rel="noopener noreferrer">Google Calendar</a>')+
+    '</div></div>'}).join("");
   Array.prototype.forEach.call($("mine").querySelectorAll("[data-cancel]"),function(b){b.onclick=function(){cancelar(b.getAttribute("data-cancel"))}});
   Array.prototype.forEach.call($("mine").querySelectorAll("[data-ics]"),function(b){b.onclick=function(){bajarIcs(b.getAttribute("data-ics"))}});
 }
@@ -433,6 +434,10 @@ function gcalUrl(t){
     "location="+encodeURIComponent(CFG.dir||CFG.nombre),
     "details="+encodeURIComponent("Turno en "+CFG.nombre+(CFG.barberos.length>1?" con "+t.barbero:"")+". Si no podés venir, avisá con tiempo.")];
   return "https://calendar.google.com/calendar/render?"+p.join("&");
+}
+function esCelular(){
+  try{return !window.matchMedia("(hover: hover) and (pointer: fine)").matches}
+  catch(e){return "ontouchstart" in window}
 }
 function esIOS(){
   return /iPad|iPhone|iPod/.test(navigator.userAgent)||
