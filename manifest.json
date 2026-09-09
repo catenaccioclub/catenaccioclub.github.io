@@ -1,0 +1,15 @@
+{
+  "name": "Catenaccio Barber Club",
+  "short_name": "Catenaccio",
+  "description": "Reserva de turnos de Catenaccio Barber Club, Muniz 908, CABA.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#E7ECE7",
+  "theme_color": "#0E5C3A",
+  "lang": "es-AR",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
