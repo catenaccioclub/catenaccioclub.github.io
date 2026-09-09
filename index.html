@@ -139,7 +139,7 @@ a.btn{display:inline-block;text-align:center;text-decoration:none}
 
 <main class="wrap">
   <div id="avisoCli" class="banner" hidden></div>
-  <div id="offline" class="banner" hidden>Vista de muestra: todavía no está conectada la base de datos, así que los turnos no se guardan. Completá config.js siguiendo el README.</div>
+  <div id="offline" class="banner" hidden style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span style="flex:1;min-width:220px">Estás probando el sistema con datos de ejemplo. Lo que cargues queda guardado en este teléfono y no lo ve nadie más.</span><button class="btn ghost" id="reiniciar">Empezar de nuevo</button></div>
 
   <section id="viewCli" class="cols">
     <div class="panel">
@@ -434,21 +434,41 @@ function gcalUrl(t){
     "details="+encodeURIComponent("Turno en "+CFG.nombre+(CFG.barberos.length>1?" con "+t.barbero:"")+". Si no podés venir, avisá con tiempo.")];
   return "https://calendar.google.com/calendar/render?"+p.join("&");
 }
+function esIOS(){
+  return /iPad|iPhone|iPod/.test(navigator.userAgent)||
+         (navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+}
+function textoIcs(t){
+  var esc2=function(x){
+    return String(x||"").replace(/([,;\\])/g,"\\$1").replace(/[\r\n]+/g," ");
+  };
+  return ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//"+esc2(CFG.nombre)+"//Turnos//ES","CALSCALE:GREGORIAN","METHOD:PUBLISH",
+    "BEGIN:VEVENT","UID:"+t.id+"@turnos",
+    "DTSTAMP:"+new Date().toISOString().replace(/[-:]/g,"").split(".")[0]+"Z",
+    "DTSTART:"+stamp(t.fecha,t.ini),"DTEND:"+stamp(t.fecha,t.ini+t.dur),
+    "SUMMARY:"+esc2(t.servicio+" - "+CFG.nombre),
+    "LOCATION:"+esc2(CFG.dir),
+    "DESCRIPTION:"+esc2("Turno en "+CFG.nombre+". Si no podés venir, avisá con tiempo."),
+    "BEGIN:VALARM","TRIGGER:-PT2H","ACTION:DISPLAY","DESCRIPTION:"+esc2("Turno en "+CFG.nombre),"END:VALARM",
+    "END:VEVENT","END:VCALENDAR"].join(String.fromCharCode(13,10));
+}
 function bajarIcs(id){
   var t=null,i;for(i=0;i<TURNOS.length;i++)if(TURNOS[i].id===id)t=TURNOS[i];
   if(!t)return;
-  var L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//"+CFG.nombre+"//Turnos//ES","CALSCALE:GREGORIAN","BEGIN:VEVENT",
-    "UID:"+t.id+"@turnos","DTSTAMP:"+new Date().toISOString().replace(/[-:]/g,"").split(".")[0]+"Z",
-    "DTSTART:"+stamp(t.fecha,t.ini),"DTEND:"+stamp(t.fecha,t.ini+t.dur),
-    "SUMMARY:"+t.servicio+" - "+CFG.nombre,"LOCATION:"+(CFG.dir||""),
-    "DESCRIPTION:Turno en "+CFG.nombre+". Si no podés venir\\, avisá con tiempo.",
-    "BEGIN:VALARM","TRIGGER:-PT2H","ACTION:DISPLAY","DESCRIPTION:Turno en "+CFG.nombre,"END:VALARM",
-    "END:VEVENT","END:VCALENDAR"];
-  var blob=new Blob([L.join("\r\n")],{type:"text/calendar;charset=utf-8"});
-  var u=URL.createObjectURL(blob),a=document.createElement("a");
-  a.href=u;a.download="turno-"+t.fecha+".ics";document.body.appendChild(a);a.click();
-  setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(u)},1500);
+  var blob=new Blob([textoIcs(t)],{type:"text/calendar;charset=utf-8"});
+  var u=URL.createObjectURL(blob);
+  if(esIOS()){
+    // El iPhone abre la vista del calendario si no se le pide una descarga.
+    window.location.href=u;
+    setTimeout(function(){URL.revokeObjectURL(u)},20000);
+    return;
+  }
+  var a=document.createElement("a");
+  a.href=u;a.download="Turno "+t.fecha+".ics";
+  a.rel="noopener";document.body.appendChild(a);a.click();
+  setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(u)},20000);
 }
+
 
 function renderAll(){
   $("brandName").textContent=CFG.nombre;$("brandSub").textContent=CFG.sub;
@@ -597,6 +617,10 @@ $("suPagado").onclick=function(){
 $("svcAdd").onclick=function(){var c=leerCfg();c.servicios.push({n:"Nuevo servicio",m:30,p:0});CFG=c;renderCfg()};
 $("barbAdd").onclick=function(){var c=leerCfg();c.barberos.push("Nuevo barbero");CFG=c;renderCfg()};
 $("confirm").onclick=confirmar;
+$("reiniciar").onclick=function(){
+  try{localStorage.removeItem("catenaccio_cfg");localStorage.removeItem("catenaccio_turnos")}catch(e){}
+  location.reload();
+};
 $("cliName").addEventListener("input",renderResume);
 $("cliTel").addEventListener("input",function(){renderResume();renderMine()});
 
@@ -623,8 +647,21 @@ function shim(sb){
     doc:function(){return{set:function(c){return sb.from("config").upsert({id:"negocio",data:c}).then(chk)}}}
   };
 }
+function guardarLocal(){
+  try{localStorage.setItem("catenaccio_turnos",JSON.stringify(TURNOS));
+      localStorage.setItem("catenaccio_cfg",JSON.stringify(CFG))}catch(e){}
+  return Promise.resolve();
+}
 function modoMuestra(){
   $("offline").hidden=false;
+  DB={collection:function(){return{doc:function(){return{set:guardarLocal,update:guardarLocal}}}},
+      doc:function(){return{set:guardarLocal}}};
+  try{
+    var c=localStorage.getItem("catenaccio_cfg");
+    if(c)CFG=Object.assign(JSON.parse(JSON.stringify(DEF)),JSON.parse(c));
+    var g=localStorage.getItem("catenaccio_turnos");
+    if(g){TURNOS=JSON.parse(g)||[];renderAll();return}
+  }catch(e){}
   var d=new Date();for(var k=0;k<7&&!CFG.dias[d.getDay()].a;k++)d.setDate(d.getDate()+1);
   TURNOS=[{id:"d1",tipo:"turno",fecha:iso(d),ini:660,dur:45,servicio:"Corte + barba",precio:13000,barbero:CFG.barberos[0],cliente:"Ejemplo: Mart\u00edn Ruiz",tel:"11 5555 0000",estado:"activo"},
           {id:"d2",tipo:"turno",fecha:iso(d),ini:960,dur:30,servicio:"Corte de pelo",precio:9000,barbero:CFG.barberos[0],cliente:"Ejemplo: Leo D\u00edaz",tel:"11 5555 1111",estado:"activo"}];

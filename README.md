@@ -63,6 +63,16 @@ gratis de por vida para un sitio de este tamaño.
 
 Para actualizar más adelante, volvés a arrastrar la carpeta.
 
+**El nombre del link importa.** Netlify te asigna uno inventado, cambialo desde
+**Site settings → Change site name**. Elegí algo que se pueda dictar por
+teléfono: `catenaccioturnos` da `catenaccioturnos.netlify.app`. Cuando el
+negocio lo justifique, un dominio propio como `catenaccio.com.ar` se compra en
+NIC Argentina o en Donweb y se conecta desde **Domain management**.
+
+**Se puede publicar antes de conectar la base.** Si dejás `config.js` con los
+valores de ejemplo, la página igual funciona: guarda todo en el teléfono de
+quien la abre. Sirve para que el barbero la pruebe de verdad antes de decidir.
+
 ---
 
 ## Primer uso
