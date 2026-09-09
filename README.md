@@ -119,18 +119,19 @@ trabajando igual. Si la prendés, los clientes ven un cartel que los manda a
 pedir turno por WhatsApp y no pueden reservar solos hasta que se regularice. La
 agenda cargada nunca se toca ni se pierde.
 
-Tené presente qué es cada cosa: la sección de suscripción es un registro de
-cobro, no una cerradura. Lo que realmente sostiene el acuerdo es que el hosting
-y el proyecto de Supabase están a tu nombre.
-
 ## Tu firma
 
 También en Ajustes, y solo visible para el administrador, cargás tu nombre, tu
 WhatsApp y tu correo. Aparecen en letra chica al pie de la página, con el
-teléfono enlazado a WhatsApp y el correo a un mail. Es lo que hace que el
-próximo cliente te encuentre solo.
+teléfono enlazado a WhatsApp y el correo a un mail.
 
 ## Qué hay que saber
+
+- **El repositorio es público y no hay problema.** GitHub Pages gratuito exige
+  que lo sea. Lo único parecido a una clave que vive acá es la `anon` de
+  Supabase, que es pública por diseño y viaja igual en el navegador de cada
+  cliente. La clave `service_role` y las contraseñas de las cuentas nunca están
+  en estos archivos.
 
 - **La agenda es visible.** Cualquiera que abra el link ve qué horarios están
   ocupados, igual que en cualquier turnera. Los nombres y teléfonos solo se ven
