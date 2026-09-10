@@ -10,74 +10,52 @@ los clientes reservan solos y el barbero maneja la agenda desde el mismo link.
   con teléfonos y total a cobrar, cancela turnos, bloquea ratos y edita
   horarios, servicios, precios y barberos.
 
-Todo cuesta cero pesos por mes. Lo único opcional que se paga es un dominio propio.
+Todo cuesta cero pesos por mes: GitHub Pages y Supabase, los dos en plan gratuito.
 
 ---
 
-## Puesta en marcha
+## Estado
 
-Son tres pasos y se hace en una tarde. No hace falta saber programar.
+Ya está todo montado y andando. Este es el mapa de lo que existe:
 
-### 1. La base de datos (Supabase)
+| | |
+| --- | --- |
+| Sitio | https://catenaccioclub.github.io |
+| Repositorio | `catenaccioclub/catenaccioclub.github.io` |
+| Base de datos | Proyecto `catenaccio-turnos`, organización Catenaccio, región San Pablo |
 
-1. Creá una cuenta gratis en [supabase.com](https://supabase.com) y un proyecto
-   nuevo. Elegí la región **South America (São Paulo)**, que es la más cercana.
-2. Entrá a **SQL Editor → New query**, pegá todo el contenido de
-   [`supabase.sql`](supabase.sql) y apretá **Run**. Eso crea las tablas y las
-   reglas de acceso.
-3. Andá a **Authentication → Users → Add user** y creá **dos usuarios**, cada
-   uno con su correo y contraseña. Marcá "Auto Confirm User" en los dos:
-   uno para el barbero y otro para vos. Después copiá el identificador de cada
-   uno y corré el `insert` que está comentado al final de `supabase.sql`, con el
-   barbero como `dueno` y vos como `admin`.
-4. En **Authentication → Providers**, desactivá el registro público
-   ("Allow new users to sign up"). Así nadie más puede crearse una cuenta.
-5. Entrá a **Settings → API** y copiá dos cosas: la **Project URL** y la clave
-   **anon public**.
+Para actualizar el sitio: editás los archivos y hacés `git push`. GitHub Pages
+republica solo en un par de minutos.
 
-### 2. Los datos de conexión
+---
 
-Abrí `config.js` con cualquier editor de texto y reemplazá los dos valores por
-los que copiaste:
+## Lo único que falta: las dos cuentas de acceso
 
-```js
-window.SUPABASE_URL = "https://xxxxxxxx.supabase.co";
-window.SUPABASE_ANON_KEY = "eyJhbGciOi...";
+El panel pide correo y contraseña, y todavía no hay ninguna cargada.
+
+1. En Supabase, **Authentication → Users → Add user → Create new user**.
+   Creá dos, marcando "Auto Confirm User" en las dos: una para el barbero y
+   otra para vos.
+2. En **Authentication → Sign In / Providers**, desactivá "Allow new users to
+   sign up". Así nadie más se crea una cuenta.
+3. Copiá el identificador de cada usuario y corré esto en el **SQL Editor**,
+   cambiando los valores:
+
+```sql
+insert into public.perfiles (id, nombre, rol) values
+  ('ID-DEL-BARBERO', 'Nombre del barbero', 'dueno'),
+  ('TU-ID',          'Patricio',           'admin')
+on conflict (id) do update set nombre = excluded.nombre, rol = excluded.rol;
 ```
 
-La clave `anon` es pública a propósito, viaja en el navegador de cada cliente.
-Lo que protege los datos son las reglas del paso 1. La clave `service_role`
-nunca va acá.
-
-### 3. Publicar la página
-
-La opción más simple, sin instalar nada:
-
-1. Entrá a [app.netlify.com/drop](https://app.netlify.com/drop).
-2. Arrastrá la carpeta entera del proyecto a la ventana.
-3. En un minuto te da una dirección tipo `catenaccio.netlify.app`.
-   Desde **Site settings → Change site name** le podés poner el nombre que quieras.
-
-Sirven igual Vercel, Cloudflare Pages o GitHub Pages. Los cuatro tienen plan
-gratis de por vida para un sitio de este tamaño.
-
-Para actualizar más adelante, volvés a arrastrar la carpeta.
-
-**El nombre del link importa.** Netlify te asigna uno inventado, cambialo desde
-**Site settings → Change site name**. Elegí algo que se pueda dictar por
-teléfono: `catenaccioturnos` da `catenaccioturnos.netlify.app`. Cuando el
-negocio lo justifique, un dominio propio como `catenaccio.com.ar` se compra en
-NIC Argentina o en Donweb y se conecta desde **Domain management**.
-
-**Se puede publicar antes de conectar la base.** Si dejás `config.js` con los
-valores de ejemplo, la página igual funciona: guarda todo en el teléfono de
-quien la abre. Sirve para que el barbero la pruebe de verdad antes de decidir.
+Sin el paso 3 las dos cuentas entran igual, pero las dos como dueño, así que la
+firma del pie no te va a aparecer.
 
 ---
 
 ## Primer uso
 
-1. Abrí el link y entrá a **Panel** con cualquiera de las dos cuentas del paso 1.3.
+1. Abrí el link y entrá a **Panel** con cualquiera de las dos cuentas.
    Arriba a la derecha vas a ver con cuál entraste y con qué rol.
 2. Cargá los horarios reales, los servicios con sus precios y los barberos.
    Apretá **Guardar ajustes**.
@@ -153,7 +131,7 @@ teléfono enlazado a WhatsApp y el correo a un mail.
 | Archivo | Para qué sirve |
 | --- | --- |
 | `index.html` | La aplicación entera: pantalla, lógica y estilos |
-| `config.js` | Las dos claves de Supabase. Es el único archivo que hay que tocar |
+| `config.js` | La dirección y la clave publicable de Supabase, ya cargadas |
 | `supabase.sql` | Tablas y reglas de acceso de la base |
 | `manifest.json` | Datos para que el celular la instale como app |
 | `icon.svg` | Ícono de la pantalla de inicio |
