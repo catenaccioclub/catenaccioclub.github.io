@@ -99,9 +99,10 @@ agenda cargada nunca se toca ni se pierde.
 
 ## Tu firma
 
-También en Ajustes, y solo visible para el administrador, cargás tu nombre, tu
-WhatsApp y tu correo. Aparecen en letra chica al pie de la página, con el
-teléfono enlazado a WhatsApp y el correo a un mail.
+También en Ajustes, y solo visible para el administrador, cargás tu nombre y tu
+WhatsApp. Aparecen en letra chica al pie de la página, con el teléfono enlazado
+a un chat de WhatsApp con el mensaje ya escrito. No hay correo a propósito: el
+contacto entra siempre por WhatsApp.
 
 ## Qué hay que saber
 
@@ -120,9 +121,12 @@ teléfono enlazado a WhatsApp y el correo a un mail.
 - **No manda recordatorios solo.** El barbero ve el teléfono en la agenda y
   escribe él. Automatizar el WhatsApp requiere una cuenta de WhatsApp Business
   API, que sí tiene costo.
-- **El plan gratis de Supabase pausa el proyecto si pasa una semana entera sin
-  uso.** Con una barbería trabajando eso no ocurre; si igual pasara, se
-  reactiva con un clic desde el panel de Supabase.
+- **El plan gratis de Supabase pausa el proyecto tras una semana sin uso.** Para
+  que no pase, una tarea de GitHub (`.github/workflows/mantener-activa.yml`)
+  consulta la base cada dos días. Si alguna vez se pausara igual, se reactiva
+  desde el panel de Supabase con "Resume project".
+- **El registro público está cerrado.** Las cuentas del panel solo se crean desde
+  Supabase, en Authentication → Users → Add user.
 
 ---
 
