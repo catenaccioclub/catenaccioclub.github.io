@@ -124,9 +124,6 @@ a.btn{display:inline-block;text-align:center;text-decoration:none}
 .links a{font-size:12.5px;font-weight:700;text-decoration:none;color:var(--brass);border:1px solid var(--line);border-radius:8px;padding:6px 10px;display:inline-block;background:var(--surface)}
 .links a:hover,.links .lnkbtn:hover{border-color:var(--brass)}
 .links .lnksec{font-family:inherit;font-size:12.5px;font-weight:700;color:var(--brass);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 10px;cursor:pointer}
-.calOpts{display:flex;flex-direction:column;gap:6px;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2)}
-.calOpts .eyebrow{margin-bottom:2px}
-.calOpts a,.calOpts button{text-align:center;padding:9px 10px!important;font-size:13.5px!important}
 .links .lnkbtn{font-family:inherit;font-size:12.5px;font-weight:700;color:var(--on-brass);background:var(--brass);border:1px solid var(--brass);border-radius:8px;padding:6px 10px;cursor:pointer}
 .mineItem{padding:11px 0;border-bottom:1px dashed var(--line)}
 .mineItem:last-child{border-bottom:0}
@@ -391,12 +388,11 @@ function renderMine(){
     '<button class="btn warn" data-cancel="'+t.id+'">Cancelar</button></div>'+
     '<div class="links" style="margin-top:8px">'+
     '<button class="lnkbtn" data-cal="'+t.id+'">Agregar al calendario</button>'+
-    '</div><div class="calOpts links" id="cal-'+t.id+'" hidden>'+
-    '<span class="eyebrow">Elegí tu calendario</span>'+opcionesCal(t)+'</div></div>'}).join("");
+    '</div></div>'}).join("");
   Array.prototype.forEach.call($("mine").querySelectorAll("[data-cancel]"),function(b){b.onclick=function(){cancelar(b.getAttribute("data-cancel"))}});
   Array.prototype.forEach.call($("mine").querySelectorAll("[data-ics]"),function(b){b.onclick=function(){bajarIcs(b.getAttribute("data-ics"))}});
   Array.prototype.forEach.call($("mine").querySelectorAll("[data-cal]"),function(b){b.onclick=function(){
-    var caja=$("cal-"+b.getAttribute("data-cal"));caja.hidden=!caja.hidden}});
+    agregarAlCalendario(b.getAttribute("data-cal"))}});
 }
 function cmp(a,b){return a.fecha===b.fecha?a.ini-b.ini:(a.fecha<b.fecha?-1:1)}
 
@@ -447,50 +443,24 @@ function datosCal(t){
   return {titulo:t.servicio+" · "+CFG.nombre, lugar:CFG.dir||CFG.nombre,
     desc:"Turno en "+CFG.nombre+(CFG.barberos.length>1?" con "+t.barbero:"")+". Si no podés venir, avisá con tiempo."};
 }
-function outlookUrl(t){
-  var d=datosCal(t),e=encodeURIComponent;
-  return "https://outlook.live.com/calendar/0/deeplink/compose?path=%2Fcalendar%2Faction%2Fcompose&rru=addevent"+
-    "&subject="+e(d.titulo)+"&startdt="+e(isoAR(t.fecha,t.ini))+"&enddt="+e(isoAR(t.fecha,t.ini+t.dur))+
-    "&location="+e(d.lugar)+"&body="+e(d.desc);
-}
-// Android: abre la pantalla "nuevo evento" de la app de calendario, ya completa.
-function intentUrl(t,paquete){
+// Android: abre la pantalla "nuevo evento" de la app de calendario que el
+// teléfono tenga por defecto (Google, Samsung, la que sea), ya completa.
+// Sin salida a ninguna página web.
+function intentUrl(t){
   var d=datosCal(t),e=encodeURIComponent;
   return "intent://#Intent;action=android.intent.action.INSERT;type=vnd.android.cursor.item/event;"+
-    (paquete?"package="+paquete+";":"")+
     "S.title="+e(d.titulo)+";S.eventLocation="+e(d.lugar)+";S.description="+e(d.desc)+
-    ";l.beginTime="+Date.parse(isoAR(t.fecha,t.ini))+";l.endTime="+Date.parse(isoAR(t.fecha,t.ini+t.dur))+
-    ";S.browser_fallback_url="+e(paquete?gcalUrl(t):outlookUrl(t))+";end";
+    ";l.beginTime="+Date.parse(isoAR(t.fecha,t.ini))+";l.endTime="+Date.parse(isoAR(t.fecha,t.ini+t.dur))+";end";
 }
-function opcionesCal(t){
-  var o=[],web=' target="_blank" rel="noopener noreferrer"';
-  if(esIOS()){
-    o.push('<button class="lnkbtn" data-ics="'+t.id+'">Calendario de iPhone</button>');
-    o.push('<a href="'+gcalUrl(t)+'"'+web+'>Google Calendar</a>');
-    o.push('<a href="'+outlookUrl(t)+'"'+web+'>Outlook</a>');
-  } else if(esAndroid()){
-    o.push('<a class="lnkbtn" href="'+intentUrl(t,"com.google.android.calendar")+'">Google Calendar</a>');
-    o.push('<a href="'+outlookUrl(t)+'"'+web+'>Outlook</a>');
-    o.push('<a href="'+intentUrl(t,"")+'">Otro calendario del teléfono</a>');
-  } else {
-    o.push('<a class="lnkbtn" href="'+gcalUrl(t)+'"'+web+'>Google Calendar</a>');
-    o.push('<a href="'+outlookUrl(t)+'"'+web+'>Outlook</a>');
-    o.push('<button class="lnksec" data-ics="'+t.id+'">Apple u otro calendario</button>');
-  }
-  return o.join("");
-}
-function gcalUrl(t){
-  var p=["action=TEMPLATE",
-    "text="+encodeURIComponent(t.servicio+" · "+CFG.nombre),
-    "dates="+stamp(t.fecha,t.ini)+"%2F"+stamp(t.fecha,t.ini+t.dur),
-    "ctz=America/Argentina/Buenos_Aires",
-    "location="+encodeURIComponent(CFG.dir||CFG.nombre),
-    "details="+encodeURIComponent("Turno en "+CFG.nombre+(CFG.barberos.length>1?" con "+t.barbero:"")+". Si no podés venir, avisá con tiempo.")];
-  return "https://calendar.google.com/calendar/render?"+p.join("&");
-}
-function esCelular(){
-  try{return !window.matchMedia("(hover: hover) and (pointer: fine)").matches}
-  catch(e){return "ontouchstart" in window}
+function enAppDeRedes(){return /Instagram|FBAN|FBAV|FB_IAB/i.test(navigator.userAgent)}
+function agregarAlCalendario(id){
+  var t=null,i;for(i=0;i<TURNOS.length;i++)if(TURNOS[i].id===id)t=TURNOS[i];
+  if(!t)return;
+  if(esAndroid())location.href=intentUrl(t);
+  else bajarIcs(id); // iPhone: pantalla nativa de Calendario. Computadora: su calendario.
+  if(enAppDeRedes())setTimeout(function(){
+    toast("Si no se abrió tu calendario, abrí esta página en Chrome o Safari.");
+  },1200);
 }
 function esIOS(){
   return /iPad|iPhone|iPod/.test(navigator.userAgent)||
