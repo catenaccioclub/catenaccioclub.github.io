@@ -1,0 +1,21 @@
+# Supabase gratuito pausa el proyecto después de 7 días sin actividad.
+# Esta tarea consulta la base cada dos días para que nunca se duerma.
+
+name: Mantener la base activa
+
+on:
+  schedule:
+    - cron: "0 12 */2 * *"
+  workflow_dispatch:
+
+jobs:
+  despertar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Consultar la base
+        run: |
+          codigo=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://ouqltpbkwvyymomxewmh.supabase.co/rest/v1/config?select=id&limit=1" \
+            -H "apikey: sb_publishable_F5cF4kzhF2ICog2w6SuiEQ_aIzF6ABn")
+          echo "Respuesta de la base: $codigo"
+          test "$codigo" = "200"

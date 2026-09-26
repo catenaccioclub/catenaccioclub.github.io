@@ -270,7 +270,7 @@ var MONTH=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","di
 var DEF={
   nombre:"Catenaccio Barber Club", sub:"Muñiz 908 · Boedo, CABA", paso:15, pin:"1234",
   dir:"Muñiz 908, C1234 CABA", mapa:"https://maps.app.goo.gl/hhxV39d5gzA3oDmm9", ig:"catenaccio.barberclub",
-  autor:{nombre:"Patricio Puella", tel:"11 6910 3013", mail:"plpuella@hotmail.com"},
+  autor:{nombre:"Patricio Puella", tel:"11 6910 3013", mail:""},
   susc:{monto:0, vence:"", link:"", corte:false},
   servicios:[{n:"Corte de pelo",m:30,p:9000},{n:"Corte + barba",m:45,p:13000},{n:"Barba y perfilado",m:20,p:6000},{n:"Corte niño",m:30,p:7500}],
   barberos:["Barbero"],
@@ -423,7 +423,7 @@ function renderPie(){
   if(a.tel)partes.push('<a href="'+wa(a.tel,"Hola "+(a.nombre||"")+", vi el sistema de turnos de "+CFG.nombre+" y quiero uno para mi local.")+'" target="_blank" rel="noopener noreferrer">'+esc(a.tel)+'</a>');
   if(a.mail)partes.push('<a href="mailto:'+esc(a.mail)+'">'+esc(a.mail)+'</a>');
   $("pie").hidden=!partes.length;
-  if(partes.length)$("creditos").innerHTML="Sistema de turnos desarrollado por "+partes.join(" &middot; ")+". ¿Querés uno para tu local? Escribime.";
+  if(partes.length)$("creditos").innerHTML="Sistema de turnos desarrollado por "+partes.join(" &middot; ")+". ¿Querés uno para tu local? Escribime por WhatsApp.";
 }
 
 function stamp(f,m){return f.replace(/-/g,"")+"T"+String(Math.floor(m/60)).padStart(2,"0")+String(m%60).padStart(2,"0")+"00"}
