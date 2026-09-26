@@ -123,6 +123,10 @@ a.btn{display:inline-block;text-align:center;text-decoration:none}
 .links{display:flex;gap:8px;flex-wrap:wrap}
 .links a{font-size:12.5px;font-weight:700;text-decoration:none;color:var(--brass);border:1px solid var(--line);border-radius:8px;padding:6px 10px;display:inline-block;background:var(--surface)}
 .links a:hover,.links .lnkbtn:hover{border-color:var(--brass)}
+.links .lnksec{font-family:inherit;font-size:12.5px;font-weight:700;color:var(--brass);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 10px;cursor:pointer}
+.calOpts{display:flex;flex-direction:column;gap:6px;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2)}
+.calOpts .eyebrow{margin-bottom:2px}
+.calOpts a,.calOpts button{text-align:center;padding:9px 10px!important;font-size:13.5px!important}
 .links .lnkbtn{font-family:inherit;font-size:12.5px;font-weight:700;color:var(--on-brass);background:var(--brass);border:1px solid var(--brass);border-radius:8px;padding:6px 10px;cursor:pointer}
 .mineItem{padding:11px 0;border-bottom:1px dashed var(--line)}
 .mineItem:last-child{border-bottom:0}
@@ -176,6 +180,16 @@ a.btn{display:inline-block;text-align:center;text-decoration:none}
       <label class="f" for="pass" style="margin-top:10px">Contraseña</label><input id="pass" type="password" autocomplete="current-password">
       <p class="note" id="pinMsg" style="margin:8px 0 12px">Usá el correo y la contraseña que cargaste en Supabase.</p>
       <button id="pinBtn" class="btn">Entrar</button>
+      <button id="olvide" class="btn ghost" style="width:100%;margin-top:8px">Olvidé mi contraseña</button>
+    </div></div>
+
+    <div id="recupero" class="panel" hidden style="max-width:420px;margin:40px auto"><div class="pad">
+      <div class="eyebrow">Nueva contraseña</div>
+      <h2 style="font-size:20px;margin:6px 0 12px">Elegí tu nueva contraseña</h2>
+      <label class="f" for="pass1">Nueva contraseña</label><input id="pass1" type="password" autocomplete="new-password">
+      <label class="f" for="pass2" style="margin-top:10px">Repetila</label><input id="pass2" type="password" autocomplete="new-password">
+      <p class="note" id="recMsg" style="margin:8px 0 12px">Mínimo 8 caracteres.</p>
+      <button id="recBtn" class="btn">Guardar y entrar</button>
     </div></div>
 
     <div id="admin" hidden class="cols">
@@ -376,11 +390,13 @@ function renderMine(){
     '<div><b>'+hhmm(t.ini)+'</b> · '+largo(t.fecha)+'<br><span class="note">'+esc(t.servicio)+'</span></div>'+
     '<button class="btn warn" data-cancel="'+t.id+'">Cancelar</button></div>'+
     '<div class="links" style="margin-top:8px">'+
-    '<button class="lnkbtn" data-ics="'+t.id+'">Agregar al calendario</button>'+
-    (esCelular()?"":'<a href="'+gcalUrl(t)+'" target="_blank" rel="noopener noreferrer">Google Calendar</a>')+
-    '</div></div>'}).join("");
+    '<button class="lnkbtn" data-cal="'+t.id+'">Agregar al calendario</button>'+
+    '</div><div class="calOpts links" id="cal-'+t.id+'" hidden>'+
+    '<span class="eyebrow">Elegí tu calendario</span>'+opcionesCal(t)+'</div></div>'}).join("");
   Array.prototype.forEach.call($("mine").querySelectorAll("[data-cancel]"),function(b){b.onclick=function(){cancelar(b.getAttribute("data-cancel"))}});
   Array.prototype.forEach.call($("mine").querySelectorAll("[data-ics]"),function(b){b.onclick=function(){bajarIcs(b.getAttribute("data-ics"))}});
+  Array.prototype.forEach.call($("mine").querySelectorAll("[data-cal]"),function(b){b.onclick=function(){
+    var caja=$("cal-"+b.getAttribute("data-cal"));caja.hidden=!caja.hidden}});
 }
 function cmp(a,b){return a.fecha===b.fecha?a.ini-b.ini:(a.fecha<b.fecha?-1:1)}
 
@@ -425,6 +441,44 @@ function renderPie(){
 }
 
 function stamp(f,m){return f.replace(/-/g,"")+"T"+String(Math.floor(m/60)).padStart(2,"0")+String(m%60).padStart(2,"0")+"00"}
+function esAndroid(){return /Android/i.test(navigator.userAgent)}
+function isoAR(f,m){return f+"T"+hhmm(m)+":00-03:00"}
+function datosCal(t){
+  return {titulo:t.servicio+" · "+CFG.nombre, lugar:CFG.dir||CFG.nombre,
+    desc:"Turno en "+CFG.nombre+(CFG.barberos.length>1?" con "+t.barbero:"")+". Si no podés venir, avisá con tiempo."};
+}
+function outlookUrl(t){
+  var d=datosCal(t),e=encodeURIComponent;
+  return "https://outlook.live.com/calendar/0/deeplink/compose?path=%2Fcalendar%2Faction%2Fcompose&rru=addevent"+
+    "&subject="+e(d.titulo)+"&startdt="+e(isoAR(t.fecha,t.ini))+"&enddt="+e(isoAR(t.fecha,t.ini+t.dur))+
+    "&location="+e(d.lugar)+"&body="+e(d.desc);
+}
+// Android: abre la pantalla "nuevo evento" de la app de calendario, ya completa.
+function intentUrl(t,paquete){
+  var d=datosCal(t),e=encodeURIComponent;
+  return "intent://#Intent;action=android.intent.action.INSERT;type=vnd.android.cursor.item/event;"+
+    (paquete?"package="+paquete+";":"")+
+    "S.title="+e(d.titulo)+";S.eventLocation="+e(d.lugar)+";S.description="+e(d.desc)+
+    ";l.beginTime="+Date.parse(isoAR(t.fecha,t.ini))+";l.endTime="+Date.parse(isoAR(t.fecha,t.ini+t.dur))+
+    ";S.browser_fallback_url="+e(paquete?gcalUrl(t):outlookUrl(t))+";end";
+}
+function opcionesCal(t){
+  var o=[],web=' target="_blank" rel="noopener noreferrer"';
+  if(esIOS()){
+    o.push('<button class="lnkbtn" data-ics="'+t.id+'">Calendario de iPhone</button>');
+    o.push('<a href="'+gcalUrl(t)+'"'+web+'>Google Calendar</a>');
+    o.push('<a href="'+outlookUrl(t)+'"'+web+'>Outlook</a>');
+  } else if(esAndroid()){
+    o.push('<a class="lnkbtn" href="'+intentUrl(t,"com.google.android.calendar")+'">Google Calendar</a>');
+    o.push('<a href="'+outlookUrl(t)+'"'+web+'>Outlook</a>');
+    o.push('<a href="'+intentUrl(t,"")+'">Otro calendario del teléfono</a>');
+  } else {
+    o.push('<a class="lnkbtn" href="'+gcalUrl(t)+'"'+web+'>Google Calendar</a>');
+    o.push('<a href="'+outlookUrl(t)+'"'+web+'>Outlook</a>');
+    o.push('<button class="lnksec" data-ics="'+t.id+'">Apple u otro calendario</button>');
+  }
+  return o.join("");
+}
 function gcalUrl(t){
   var p=["action=TEMPLATE",
     "text="+encodeURIComponent(t.servicio+" · "+CFG.nombre),
@@ -605,6 +659,34 @@ $("pinBtn").onclick=function(){
     cargarPerfil().then(abrirPanel);
   });
 };
+function mostrarRecupero(){
+  $("tabAdm").click();$("gate").hidden=true;$("admin").hidden=true;$("recupero").hidden=false;
+}
+$("olvide").onclick=function(){
+  if(!SB){$("pinMsg").textContent="Falta configurar Supabase en config.js.";return}
+  var m=$("mail").value.trim();
+  if(!m){$("pinMsg").textContent="Escribí tu correo arriba y tocá de nuevo.";$("mail").focus();return}
+  var b=$("olvide");b.disabled=true;
+  SB.auth.resetPasswordForEmail(m,{redirectTo:location.origin+location.pathname}).then(function(r){
+    b.disabled=false;
+    $("pinMsg").textContent=r.error
+      ?"No pudimos mandar el correo. Esperá unos minutos y probá de nuevo."
+      :"Listo. Te mandamos un correo a "+m+". Abrí el enlace y elegí la contraseña nueva.";
+  });
+};
+$("recBtn").onclick=function(){
+  var p1=$("pass1").value,p2=$("pass2").value;
+  if(p1.length<8){$("recMsg").textContent="Tiene que tener al menos 8 caracteres.";return}
+  if(p1!==p2){$("recMsg").textContent="Las dos no coinciden. Escribilas de nuevo.";return}
+  var b=$("recBtn");b.disabled=true;b.textContent="Guardando...";
+  SB.auth.updateUser({password:p1}).then(function(r){
+    b.disabled=false;b.textContent="Guardar y entrar";
+    if(r.error){$("recMsg").textContent="No se pudo guardar. Pedí otro correo desde \"Olvidé mi contraseña\".";return}
+    $("pass1").value="";$("pass2").value="";$("recupero").hidden=true;
+    history.replaceState(null,"",location.pathname);
+    toast("Contraseña guardada");cargarPerfil().then(abrirPanel);
+  });
+};
 $("pass").addEventListener("keydown",function(e){if(e.key==="Enter")$("pinBtn").click()});
 $("salir").onclick=function(){if(SB)SB.auth.signOut();$("admin").hidden=true;$("gate").hidden=false;$("pass").value=""};
 $("agDate").onchange=renderAdmin;
@@ -690,11 +772,13 @@ function traerConfig(){
 (function(){
   var url=window.SUPABASE_URL,key=window.SUPABASE_ANON_KEY;
   if(!url||!key||!window.supabase||url.indexOf("TU-")===0){modoMuestra();return}
+  var vieneDeRecupero=/type=recovery/.test(location.hash);
   SB=window.supabase.createClient(url,key);
+  SB.auth.onAuthStateChange(function(ev){if(ev==="PASSWORD_RECOVERY")mostrarRecupero()});
   DB=shim(SB);
   traerConfig();traerTurnos();
   SB.channel("turnos-live").on("postgres_changes",{event:"*",schema:"public",table:"turnos"},traerTurnos)
     .on("postgres_changes",{event:"*",schema:"public",table:"config"},traerConfig).subscribe();
-  SB.auth.getSession().then(function(r){if(r.data&&r.data.session)cargarPerfil().then(abrirPanel)});
+  SB.auth.getSession().then(function(r){if(!(r.data&&r.data.session))return;if(vieneDeRecupero){mostrarRecupero();return}cargarPerfil().then(abrirPanel)});
 })();
 </script>
